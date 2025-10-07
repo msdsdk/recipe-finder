@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Finder - Find Recipes by Ingredients</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        .modal-overlay {
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-orange-50 to-red-50 min-h-screen">
+    <div id="app"></div>
+
+    <script>
+        const recipeDatabase = [
+            {
+                id: 1,
+                name: "Classic Margherita Pizza",
+                ingredients: ["flour", "tomato", "cheese", "basil", "olive oil"],
+                time: "30 min",
+                servings: 4,
+                difficulty: "Easy",
+                instructions: [
+                    "Prepare pizza dough with flour, water, yeast, and salt",
+                    "Roll out the dough into a circle",
+                    "Spread tomato sauce on the base",
+                    "Add mozzarella cheese slices",
+                    "Drizzle with olive oil",
+                    "Bake at 450°F for 12-15 minutes",
+                    "Garnish with fresh basil leaves"
+                ],
+                image: "🍕"
+            },
+            {
+                id: 2,
+                name: "Chicken Stir Fry",
+                ingredients: ["chicken", "soy sauce", "garlic", "ginger", "vegetables", "rice"],
+                time: "25 min",
+                servings: 3,
+                difficulty: "Medium",
+                instructions: [
+                    "Cut chicken into bite-sized pieces",
+                    "Marinate chicken with soy sauce, garlic, and ginger",
+                    "Heat oil in a wok or large pan",
+                    "Stir-fry chicken until cooked through",
+                    "Add vegetables and stir-fry for 5 minutes",
+                    "Serve hot over steamed rice"
+                ],
+                image: "🍜"
+            },
+            {
+                id: 3,
+                name: "Caesar Salad",
+                ingredients: ["lettuce", "chicken", "cheese", "bread", "garlic", "lemon"],
+                time: "15 min",
+                servings: 2,
+                difficulty: "Easy",
+                instructions: [
+                    "Wash and chop romaine lettuce",
+                    "Grill or pan-fry chicken breast",
+                    "Make croutons from bread cubes",
+                    "Prepare dressing with garlic, lemon, and anchovy",
+                    "Toss lettuce with dressing",
+                    "Top with chicken, parmesan cheese, and croutons"
+                ],
+                image: "🥗"
+            },
+            {
+                id: 4,
+                name: "Spaghetti Carbonara",
+                ingredients: ["pasta", "egg", "cheese", "bacon", "garlic", "olive oil"],
+                time: "20 min",
+                servings: 4,
+                difficulty: "Medium",
+                instructions: [
+                    "Cook spaghetti according to package directions",
+                    "Fry bacon until crispy",
+                    "Beat eggs with grated parmesan cheese",
+                    "Sauté garlic in olive oil",
+                    "Combine hot pasta with egg mixture",
+                    "Add bacon and toss quickly",
+                    "Serve immediately with extra cheese"
+                ],
+                image: "🍝"
+            },
+            {
+                id: 5,
+                name: "Vegetable Curry",
+                ingredients: ["potato", "carrot", "onion", "tomato", "coconut milk", "curry powder", "rice"],
+                time: "35 min",
+                servings: 4,
+                difficulty: "Medium",
+                instructions: [
+                    "Chop all vegetables into bite-sized pieces",
+                    "Sauté onions until golden",
+                    "Add curry powder and cook for 1 minute",
+                    "Add vegetables and tomatoes",
+                    "Pour in coconut milk and simmer for 20 minutes",
+                    "Serve hot with steamed rice"
+                ],
+                image: "🍛"
+            },
+            {
+                id: 6,
+                name: "Pancakes",
+                ingredients: ["flour", "egg", "milk", "butter", "sugar"],
+                time: "20 min",
+                servings: 4,
+                difficulty: "Easy",
+                instructions: [
+                    "Mix flour, sugar, and a pinch of salt",
+                    "Whisk together eggs and milk",
+                    "Combine wet and dry ingredients",
+                    "Melt butter in a pan",
+                    "Pour batter and cook until bubbles form",
+                    "Flip and cook for another minute",
+                    "Serve with syrup or fresh fruit"
+                ],
+                image: "🥞"
+            },
+            {
+                id: 7,
+                name: "Greek Salad",
+                ingredients: ["tomato", "cucumber", "onion", "cheese", "olive oil", "lemon"],
+                time: "10 min",
+                servings: 2,
+                difficulty: "Easy",
+                instructions: [
+                    "Chop tomatoes, cucumbers, and onions",
+                    "Cube feta cheese",
+                    "Combine vegetables in a bowl",
+                    "Add olives if available",
+                    "Dress with olive oil and lemon juice",
+                    "Season with oregano, salt, and pepper"
+                ],
+                image: "🥗"
+            },
+            {
+                id: 8,
+                name: "Beef Tacos",
+                ingredients: ["beef", "tortilla", "cheese", "tomato", "lettuce", "onion"],
+                time: "25 min",
+                servings: 4,
+                difficulty: "Easy",
+                instructions: [
+                    "Brown ground beef with taco seasoning",
+                    "Warm tortillas in a pan",
+                    "Chop lettuce, tomatoes, and onions",
+                    "Assemble tacos with beef and toppings",
+                    "Add shredded cheese",
+                    "Serve with sour cream and salsa"
+                ],
+                image: "🌮"
+            },
+            {
+                id: 9,
+                name: "Mushroom Risotto",
+                ingredients: ["rice", "mushroom", "cheese", "onion", "garlic", "butter"],
+                time: "40 min",
+                servings: 3,
+                difficulty: "Hard",
+                instructions: [
+                    "Sauté mushrooms in butter until golden",
+                    "In another pan, sauté onions and garlic",
+                    "Add arborio rice and toast for 2 minutes",
+                    "Add warm broth gradually, stirring constantly",
+                    "Continue until rice is creamy and al dente",
+                    "Stir in mushrooms, butter, and parmesan cheese",
+                    "Serve immediately garnished with herbs"
+                ],
+                image: "🍚"
+            },
+            {
+                id: 10,
+                name: "Chocolate Chip Cookies",
+                ingredients: ["flour", "butter", "sugar", "egg", "chocolate"],
+                time: "25 min",
+                servings: 24,
+                difficulty: "Easy",
+                instructions: [
+                    "Cream together butter and sugar",
+                    "Beat in eggs and vanilla extract",
+                    "Mix in flour, baking soda, and salt",
+                    "Fold in chocolate chips",
+                    "Drop spoonfuls onto baking sheet",
+                    "Bake at 375°F for 10-12 minutes",
+                    "Cool on wire rack and enjoy"
+                ],
+                image: "🍪"
+            }
+        ];
+
+        let state = {
+            ingredients: [],
+            inputValue: '',
+            recipes: [],
+            loading: false,
+            selectedRecipe: null
+        };
+
+        function setState(newState) {
+            state = { ...state, ...newState };
+            render();
+        }
+
+        function addIngredient() {
+            const value = state.inputValue.toLowerCase().trim();
+            if (value && !state.ingredients.includes(value)) {
+                setState({
+                    ingredients: [...state.ingredients, value],
+                    inputValue: ''
+                });
+            }
+        }
+
+        function removeIngredient(ing) {
+            setState({
+                ingredients: state.ingredients.filter(i => i !== ing)
+            });
+        }
+
+        function searchRecipes() {
+            setState({ loading: true });
+            
+            setTimeout(() => {
+                const matchedRecipes = recipeDatabase.map(recipe => {
+                    const matchCount = recipe.ingredients.filter(ing =>
+                        state.ingredients.some(userIng => 
+                            ing.includes(userIng) || userIng.includes(ing)
+                        )
+                    ).length;
+                    return { ...recipe, matchCount };
+                })
+                .filter(recipe => recipe.matchCount > 0)
+                .sort((a, b) => b.matchCount - a.matchCount);
+
+                setState({ recipes: matchedRecipes, loading: false });
+            }, 500);
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="max-w-6xl mx-auto p-4">
+                    <!-- Header -->
+                    <div class="text-center mb-8 pt-8 fade-in">
+                        <div class="flex justify-center items-center gap-3 mb-4">
+                            <svg class="w-12 h-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            <h1 class="text-5xl font-bold text-gray-800">Recipe Finder</h1>
+                        </div>
+                        <p class="text-gray-600 text-lg">Find delicious recipes based on what you have!</p>
+                    </div>
+
+                    <!-- Input Section -->
+                    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 fade-in">
+                        <h2 class="text-2xl font-semibold mb-4 text-gray-800">Available Ingredients</h2>
+                        
+                        <div class="flex gap-2 mb-6">
+                            <input
+                                type="text"
+                                id="ingredientInput"
+                                value="${state.inputValue}"
+                                placeholder="Enter an ingredient (e.g., chicken, tomato...)"
+                                class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-red-500 text-lg"
+                            />
+                            <button
+                                onclick="addIngredient()"
+                                class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition flex items-center gap-2 font-semibold"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Add
+                            </button>
+                        </div>
+
+                        <!-- Ingredient Tags -->
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            ${state.ingredients.map(ing => `
+                                <span class="bg-red-100 text-red-700 px-4 py-2 rounded-full flex items-center gap-2 text-sm font-medium">
+                                    ${ing}
+                                    <svg onclick="removeIngredient('${ing}')" class="w-4 h-4 cursor-pointer hover:text-red-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </span>
+                            `).join('')}
+                        </div>
+
+                        <button
+                            onclick="searchRecipes()"
+                            ${state.ingredients.length === 0 ? 'disabled' : ''}
+                            class="w-full bg-gradient-to-r from-red-600 to-orange-600 text-white py-4 rounded-lg hover:from-red-700 hover:to-orange-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg font-semibold"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            ${state.loading ? 'Searching...' : 'Find Recipes'}
+                        </button>
+                    </div>
+
+                    <!-- Results Section -->
+                    ${state.recipes.length > 0 ? `
+                        <div class="bg-white rounded-2xl shadow-xl p-8 fade-in">
+                            <h2 class="text-2xl font-semibold mb-6 text-gray-800">
+                                Found ${state.recipes.length} Recipe${state.recipes.length !== 1 ? 's' : ''}
+                            </h2>
+                            
+                            <div class="grid md:grid-cols-2 gap-6">
+                                ${state.recipes.map(recipe => `
+                                    <div onclick='showRecipeDetails(${JSON.stringify(recipe).replace(/'/g, "&apos;")})' class="border-2 border-gray-200 rounded-xl p-6 hover:border-red-400 hover:shadow-lg transition cursor-pointer">
+                                        <div class="flex items-start gap-4">
+                                            <div class="text-6xl">${recipe.image}</div>
+                                            <div class="flex-1">
+                                                <h3 class="text-xl font-bold text-gray-800 mb-2">${recipe.name}</h3>
+                                                
+                                                <div class="flex gap-4 text-sm text-gray-600 mb-3">
+                                                    <span class="flex items-center gap-1">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                        </svg>
+                                                        ${recipe.time}
+                                                    </span>
+                                                    <span class="flex items-center gap-1">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                        </svg>
+                                                        ${recipe.servings} servings
+                                                    </span>
+                                                    <span class="flex items-center gap-1">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path>
+                                                        </svg>
+                                                        ${recipe.difficulty}
+                                                    </span>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <span class="text-sm font-semibold text-green-600">
+                                                        ✓ ${recipe.matchCount} matching ingredient${recipe.matchCount !== 1 ? 's' : ''}
+                                                    </span>
+                                                </div>
+
+                                                <div class="flex flex-wrap gap-1">
+                                                    ${recipe.ingredients.map(ing => {
+                                                        const hasIngredient = state.ingredients.some(userIng => 
+                                                            ing.includes(userIng) || userIng.includes(ing)
+                                                        );
+                                                        return `
+                                                            <span class="text-xs px-2 py-1 rounded-full ${hasIngredient ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">
+                                                                ${ing}
+                                                            </span>
+                                                        `;
+                                                    }).join('')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${state.ingredients.length > 0 && state.recipes.length === 0 && !state.loading ? `
+                        <div class="bg-white rounded-2xl shadow-xl p-8 text-center fade-in">
+                            <p class="text-gray-600 text-lg">No recipes found. Try adding different ingredients!</p>
+                        </div>
+                    ` : ''}
+
+                    <!-- Recipe Detail Modal -->
+                    ${state.selectedRecipe ? `
+                        <div class="fixed inset-0 bg-black bg-opacity-50 modal-overlay flex items-center justify-center p-4 z-50" onclick="closeModal(event)">
+                            <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 fade-in" onclick="event.stopPropagation()">
+                                <div class="flex justify-between items-start mb-6">
+                                    <div class="flex items-center gap-4">
+                                        <span class="text-7xl">${state.selectedRecipe.image}</span>
+                                        <div>
+                                            <h2 class="text-3xl font-bold text-gray-800">${state.selectedRecipe.name}</h2>
+                                            <div class="flex gap-4 text-sm text-gray-600 mt-2">
+                                                <span class="flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                    ${state.selectedRecipe.time}
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                    </svg>
+                                                    ${state.selectedRecipe.servings} servings
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path>
+                                                    </svg>
+                                                    ${state.selectedRecipe.difficulty}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button onclick="setState({ selectedRecipe: null })" class="text-gray-500 hover:text-gray-700">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div class="mb-6">
+                                    <h3 class="text-xl font-semibold mb-3 text-gray-800">Ingredients</h3>
+                                    <div class="flex flex-wrap gap-2">
+                                        ${state.selectedRecipe.ingredients.map(ing => {
+                                            const hasIngredient = state.ingredients.some(userIng => 
+                                                ing.includes(userIng) || userIng.includes(ing)
+                                            );
+                                            return `
+                                                <span class="px-3 py-1 rounded-full text-sm ${hasIngredient ? 'bg-green-100 text-green-700 font-medium' : 'bg-gray-100 text-gray-600'}">
+                                                    ${ing}
+                                                </span>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 class="text-xl font-semibold mb-3 text-gray-800">Instructions</h3>
+                                    <ol class="space-y-3">
+                                        ${state.selectedRecipe.instructions.map((step, idx) => `
+                                            <li class="flex gap-3">
+                                                <span class="flex-shrink-0 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                                                    ${idx + 1}
+                                                </span>
+                                                <span class="text-gray-700">${step}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            // Re-attach event listener for input
+            const input = document.getElementById('ingredientInput');
+            if (input) {
+                input.addEventListener('input', (e) => {
+                    state.inputValue = e.target.value;
+                });
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        addIngredient();
+                    }
+                });
+            }
+        }
+
+        function showRecipeDetails(recipe) {
+            setState({ selectedRecipe: recipe });
+        }
+
+        function closeModal(event) {
+            if (event.target === event.currentTarget) {
+                setState({ selectedRecipe: null });
+            }
+        }
+
+        // Initial render
+        render();
+    </script>
+</body>
+</html>
